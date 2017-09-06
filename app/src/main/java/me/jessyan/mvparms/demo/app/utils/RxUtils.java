@@ -1,7 +1,7 @@
 package me.jessyan.mvparms.demo.app.utils;
 
 import com.jess.arms.mvp.IView;
-import com.trello.rxlifecycle2.LifecycleProvider;
+import com.jess.arms.utils.RxLifecycleUtils;
 import com.trello.rxlifecycle2.LifecycleTransformer;
 
 import io.reactivex.Observable;
@@ -37,24 +37,27 @@ public class RxUtils {
                         })
                         .subscribeOn(AndroidSchedulers.mainThread())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .doAfterTerminate(new Action() {
+                        .doFinally(new Action() {
                             @Override
                             public void run() {
                                 view.hideLoading();//隐藏进度条
                             }
-                        }).compose(RxUtils.bindToLifecycle(view));
+                        }).compose(RxLifecycleUtils.bindToLifecycle(view));
             }
         };
     }
 
-
+    /**
+     * 此接口已废弃
+     *
+     * @see RxLifecycleUtils 使用此类代替
+     * @param view
+     * @param <T>
+     * @return
+     */
+    @Deprecated
     public static <T> LifecycleTransformer<T> bindToLifecycle(IView view) {
-        if (view instanceof LifecycleProvider){
-            return ((LifecycleProvider)view).bindToLifecycle();
-        }else {
-            throw new IllegalArgumentException("view isn't activity or fragment");
-        }
-
+        return RxLifecycleUtils.bindToLifecycle(view);
     }
 
 }

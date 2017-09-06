@@ -73,10 +73,9 @@ dependencies {
     }
     compile(rootProject.ext.dependencies["rxlifecycle2"]) {
         exclude module: 'rxjava'
+        exclude module: 'jsr305'
     }
-    compile(rootProject.ext.dependencies["rxlifecycle2-components"]) {
-        exclude module: 'support-v4'
-        exclude module: 'appcompat-v7'
+    compile(rootProject.ext.dependencies["rxlifecycle2-android"]) {
         exclude module: 'support-annotations'
         exclude module: 'rxjava'
         exclude module: 'rxandroid'
@@ -109,7 +108,12 @@ dependencies {
         exclude module: 'okio'
     }
     compile rootProject.ext.dependencies["okhttp3"]
-    compile rootProject.ext.dependencies["glide"]
+    compile(rootProject.ext.dependencies["glide"]) {
+        exclude module: 'support-v4'
+    }
+    annotationProcessor(rootProject.ext.dependencies["glide-compiler"]) {
+        exclude module: 'jsr305'
+    }
 
     //tools
     provided rootProject.ext.dependencies["javax.annotation"]

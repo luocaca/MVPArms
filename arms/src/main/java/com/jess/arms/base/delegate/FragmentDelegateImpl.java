@@ -7,7 +7,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.view.View;
 
-import com.jess.arms.base.App;
+import com.jess.arms.utils.ArmsUtils;
 
 import org.simple.eventbus.EventBus;
 
@@ -42,7 +42,7 @@ public class FragmentDelegateImpl implements FragmentDelegate {
     public void onCreate(Bundle savedInstanceState) {
         if (iFragment.useEventBus())//如果要使用eventbus请将此方法返回true
             EventBus.getDefault().register(mFragment);//注册到事件主线
-        iFragment.setupFragmentComponent(((App) mFragment.getActivity().getApplication()).getAppComponent());
+        iFragment.setupFragmentComponent(ArmsUtils.obtainAppComponentFromContext(mFragment.getActivity()));
     }
 
     @Override
@@ -115,7 +115,7 @@ public class FragmentDelegateImpl implements FragmentDelegate {
      */
     @Override
     public boolean isAdded() {
-        return mFragment == null ? false : mFragment.isAdded();
+        return mFragment != null && mFragment.isAdded();
     }
 
     @Override

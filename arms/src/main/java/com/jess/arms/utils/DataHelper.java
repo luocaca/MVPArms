@@ -14,7 +14,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 /**
- * Created by zhiyicx on 2016/3/15.
+ * ================================================
+ * Created by JessYan on 2016/3/15
+ * Contact with jess.yan.effort@gmail.com
+ * Follow me on https://github.com/JessYanCoding
+ * ================================================
  */
 public class DataHelper {
     private static SharedPreferences mSharedPreferences;
@@ -22,6 +26,7 @@ public class DataHelper {
 
 
     private DataHelper() {
+        throw new IllegalStateException("you can't instantiate me!");
     }
 
     /**
@@ -167,7 +172,7 @@ public class DataHelper {
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             File file = null;
             file = context.getExternalCacheDir();//获取系统管理的sd卡缓存文件
-            if (file == null) {//如果获取的为空,就是用自己定义的缓存文件夹做缓存路径
+            if (file == null) {//如果获取的文件为空,就使用自己定义的缓存文件夹做缓存路径
                 file = new File(getCacheFilePath(context));
                 makeDirs(file);
             }

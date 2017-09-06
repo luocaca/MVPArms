@@ -4,10 +4,12 @@ import android.app.Application;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import com.jess.arms.http.BaseUrl;
 import com.jess.arms.http.GlobalHttpHandler;
+import com.jess.arms.http.RequestInterceptor;
 import com.jess.arms.utils.DataHelper;
-import com.jess.arms.widget.imageloader.BaseImageLoaderStrategy;
-import com.jess.arms.widget.imageloader.glide.GlideImageLoaderStrategy;
+import com.jess.arms.http.imageloader.BaseImageLoaderStrategy;
+import com.jess.arms.http.imageloader.glide.GlideImageLoaderStrategy;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -27,6 +29,7 @@ import okhttp3.Interceptor;
 @Module
 public class GlobalConfigModule {
     private HttpUrl mApiUrl;
+    private BaseUrl mBaseUrl;
     private BaseImageLoaderStrategy mLoaderStrategy;
     private GlobalHttpHandler mHandler;
     private List<Interceptor> mInterceptors;
@@ -36,6 +39,7 @@ public class GlobalConfigModule {
     private ClientModule.OkhttpConfiguration mOkhttpConfiguration;
     private ClientModule.RxCacheConfiguration mRxCacheConfiguration;
     private AppModule.GsonConfiguration mGsonConfiguration;
+    private RequestInterceptor.Level mPrintHttpLogLevel;
 
     /**
      * @author: jess
@@ -44,6 +48,7 @@ public class GlobalConfigModule {
      */
     private GlobalConfigModule(Builder builder) {
         this.mApiUrl = builder.apiUrl;
+        this.mBaseUrl = builder.baseUrl;
         this.mLoaderStrategy = builder.loaderStrategy;
         this.mHandler = builder.handler;
         this.mInterceptors = builder.interceptors;
@@ -53,6 +58,7 @@ public class GlobalConfigModule {
         this.mOkhttpConfiguration = builder.okhttpConfiguration;
         this.mRxCacheConfiguration = builder.rxCacheConfiguration;
         this.mGsonConfiguration = builder.gsonConfiguration;
+        this.mPrintHttpLogLevel = builder.printHttpLogLevel;
     }
 
     public static Builder builder() {
@@ -71,6 +77,12 @@ public class GlobalConfigModule {
     @Singleton
     @Provides
     HttpUrl provideBaseUrl() {
+        if (mBaseUrl != null) {
+            HttpUrl httpUrl = mBaseUrl.url();
+            if (httpUrl != null) {
+                return httpUrl;
+            }
+        }
         return mApiUrl == null ? HttpUrl.parse("https://api.github.com/") : mApiUrl;
     }
 
@@ -140,9 +152,17 @@ public class GlobalConfigModule {
         return mGsonConfiguration;
     }
 
+    @Singleton
+    @Provides
+    @Nullable
+    RequestInterceptor.Level providePrintHttpLogLevel() {
+        return mPrintHttpLogLevel;
+    }
+
 
     public static final class Builder {
         private HttpUrl apiUrl;
+        private BaseUrl baseUrl;
         private BaseImageLoaderStrategy loaderStrategy;
         private GlobalHttpHandler handler;
         private List<Interceptor> interceptors;
@@ -152,15 +172,24 @@ public class GlobalConfigModule {
         private ClientModule.OkhttpConfiguration okhttpConfiguration;
         private ClientModule.RxCacheConfiguration rxCacheConfiguration;
         private AppModule.GsonConfiguration gsonConfiguration;
+        private RequestInterceptor.Level printHttpLogLevel;
 
         private Builder() {
         }
 
-        public Builder baseurl(String baseurl) {//基础url
-            if (TextUtils.isEmpty(baseurl)) {
-                throw new IllegalArgumentException("baseurl can not be empty");
+        public Builder baseurl(String baseUrl) {//基础url
+            if (TextUtils.isEmpty(baseUrl)) {
+                throw new IllegalArgumentException("BaseUrl can not be empty");
             }
-            this.apiUrl = HttpUrl.parse(baseurl);
+            this.apiUrl = HttpUrl.parse(baseUrl);
+            return this;
+        }
+
+        public Builder baseurl(BaseUrl baseUrl) {
+            if (baseUrl == null) {
+                throw new IllegalArgumentException("BaseUrl can not be null");
+            }
+            this.baseUrl = baseUrl;
             return this;
         }
 
@@ -213,6 +242,11 @@ public class GlobalConfigModule {
             return this;
         }
 
+        public Builder printHttpLogLevel(RequestInterceptor.Level printHttpLogLevel) { //是否让框架打印 Http 的请求和响应信息
+            if (printHttpLogLevel == null) throw new IllegalArgumentException("printHttpLogLevel == null. Use RequestInterceptor.Level.NONE instead.");
+            this.printHttpLogLevel = printHttpLogLevel;
+            return this;
+        }
 
         public GlobalConfigModule build() {
             return new GlobalConfigModule(this);
